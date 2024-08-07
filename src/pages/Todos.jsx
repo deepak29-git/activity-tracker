@@ -143,7 +143,7 @@ export default function Todos() {
         <Grid item>
           <TextField
             id="outlined-basic"
-            label="Outlined"
+            label="Enter todos"
             value={todoName}
             variant="outlined"
             onChange={(e) => setTodoName(e.target.value)}

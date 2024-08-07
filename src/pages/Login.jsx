@@ -15,45 +15,48 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
-
-function Copyright(props) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}>
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
-
-// TODO remove, this demo shouldn't need to reset the theme.
+import { IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const defaultTheme = createTheme();
 
 export default function Login() {
   const navigate = useNavigate();
+  const [error, setError] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true);
+    setError(null);
+
     const data = new FormData(event.currentTarget);
     const url = "https://node-server-k3tz.onrender.com/login";
     const payload = {
       email: data.get("email"),
       password: data.get("password"),
     };
-    const response = await axios.post(url, payload);
-    const token = response?.data?.token;
-    Cookies.set("token", token, { expires: 7, secure: true });
-    const getToken = Cookies.get("token");
-    if (getToken) {
-      navigate("/todos");
+
+    try {
+      const response = await axios.post(url, payload);
+      const token = response?.data?.token;
+      if (token) {
+        Cookies.set("token", token, { expires: 7, secure: true });
+        navigate("/todos");
+      } else {
+        setError("Invalid credentials");
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,43 +91,69 @@ export default function Login() {
               name="email"
               autoComplete="email"
               autoFocus
+              error={!!error}
+              helperText={error && error.includes("email") && error}
             />
             <TextField
               margin="normal"
               required
               fullWidth
-              name="password"
+              label={"Password"}
+              type={showPassword ? "text" : "password"}
+              // {...props}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            {/* <TextField
+              margin="normal"
+              required
+              fullWidth
+              type={showPassword ? "text" : "password"}
+              inputProps={{
+                sta
+              }}
+                
+              
+              // endAdornment={
+              //   <InputAdornment position="end">
+              //     <IconButton
+              //       aria-label="toggle password visibility"
+              //       onClick={handleClickShowPassword}
+              //       onMouseDown={handleMouseDownPassword}
+              //       edge="end">
+              //       {showPassword ? <VisibilityOff /> : <Visibility />}
+              //     </IconButton>
+              //   </InputAdornment>
+              }
               label="Password"
-              type="password"
+              name="password"
               id="password"
               autoComplete="current-password"
-            />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
+              error={!!error}
+              helperText={error && error.includes("password") && error}
+            /> */}
+            {error && <Typography color="error">{error}</Typography>}
+
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}>
-              Sign In
+              sx={{ mt: 3, mb: 2 }}
+              disabled={loading}>
+              {loading ? "Signing In..." : "Sign In"}
             </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="#" variant="body2">
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
-                </Link>
-              </Grid>
-            </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 8, mb: 4 }} />
       </Container>
     </ThemeProvider>
   );
