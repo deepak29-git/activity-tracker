@@ -44,6 +44,16 @@ export default function Login() {
       password: data.get("password"),
     };
 
+    const email = data.get("email");
+    const password = data.get("password");
+
+    // Validate email and password
+    if (!email || !password) {
+      setError("Both email and password are required.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post(url, payload);
       const token = response?.data?.token;
@@ -96,11 +106,14 @@ export default function Login() {
             />
             <TextField
               margin="normal"
+              name="password"
+              id="password"
               required
               fullWidth
               label={"Password"}
               type={showPassword ? "text" : "password"}
-              // {...props}
+              error={!!error}
+              helperText={error && error.includes("password") && error}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -114,35 +127,6 @@ export default function Login() {
                 ),
               }}
             />
-            {/* <TextField
-              margin="normal"
-              required
-              fullWidth
-              type={showPassword ? "text" : "password"}
-              inputProps={{
-                sta
-              }}
-                
-              
-              // endAdornment={
-              //   <InputAdornment position="end">
-              //     <IconButton
-              //       aria-label="toggle password visibility"
-              //       onClick={handleClickShowPassword}
-              //       onMouseDown={handleMouseDownPassword}
-              //       edge="end">
-              //       {showPassword ? <VisibilityOff /> : <Visibility />}
-              //     </IconButton>
-              //   </InputAdornment>
-              }
-              label="Password"
-              name="password"
-              id="password"
-              autoComplete="current-password"
-              error={!!error}
-              helperText={error && error.includes("password") && error}
-            /> */}
-            {error && <Typography color="error">{error}</Typography>}
 
             <Button
               type="submit"
