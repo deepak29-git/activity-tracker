@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -18,15 +18,21 @@ const defaultTheme = createTheme();
 
 export default function Login() {
   const navigate = useNavigate();
-  const [error, setError] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
-  const [showPassword, setShowPassword] = React.useState(false);
-
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const token = Cookies.get("token");
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+
+  useEffect(() => {
+    if (token) {
+      navigate("/todos");
+    }
+  }, [token, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
